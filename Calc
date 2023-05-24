@@ -1,0 +1,89 @@
+import UIKit
+
+class ViewController: UIViewController {
+
+    // Outlets for the UI components
+    @IBOutlet weak var displayLabel: UILabel!
+    
+    // Variables to store the numbers and operation
+    var firstNumber: Double = 0
+    var secondNumber: Double = 0
+    var currentOperation: String = ""
+    var isTypingNumber: Bool = false
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+    }
+    
+    // Function to update the display label
+    func updateDisplay() {
+        displayLabel.text = String(firstNumber)
+    }
+    
+    // Function to perform the selected operation
+    func performOperation(operation: String) {
+        if currentOperation != "" {
+            if isTypingNumber {
+                secondNumber = Double(displayLabel.text!)!
+                isTypingNumber = false
+                
+                switch currentOperation {
+                case "+":
+                    firstNumber += secondNumber
+                case "-":
+                    firstNumber -= secondNumber
+                case "*":
+                    firstNumber *= secondNumber
+                case "/":
+                    firstNumber /= secondNumber
+                default:
+                    break
+                }
+                
+                secondNumber = 0
+            }
+            
+            currentOperation = operation
+            updateDisplay()
+        } else {
+            firstNumber = Double(displayLabel.text!)!
+            currentOperation = operation
+            isTypingNumber = false
+        }
+    }
+    
+    // IBAction for number buttons
+    @IBAction func numberButtonPressed(_ sender: UIButton) {
+        let number = sender.tag
+        
+        if isTypingNumber {
+            displayLabel.text = displayLabel.text! + String(number)
+        } else {
+            displayLabel.text = String(number)
+            isTypingNumber = true
+        }
+    }
+    
+    // IBAction for operation buttons
+    @IBAction func operationButtonPressed(_ sender: UIButton) {
+        let operation = sender.titleLabel?.text
+        
+        if operation != nil {
+            performOperation(operation: operation!)
+        }
+    }
+    
+    // IBAction for equal button
+    @IBAction func equalButtonPressed(_ sender: UIButton) {
+        performOperation(operation: "")
+    }
+    
+    // IBAction for clear button
+    @IBAction func clearButtonPressed(_ sender: UIButton) {
+        firstNumber = 0
+        secondNumber = 0
+        currentOperation = ""
+        isTypingNumber = false
+        updateDisplay()
+    }
+}
