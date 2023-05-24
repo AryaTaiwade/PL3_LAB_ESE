@@ -1,0 +1,103 @@
+import UIKit
+
+class ShoppingListViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    
+    @IBOutlet weak var tableView: UITableView!
+    @IBOutlet weak var newListTextField: UITextField!
+    
+    var shoppingLists: [String] = []  // Array to store the shopping lists
+    var currentListItems: [String] = []  // Array to store the items in the current shopping list
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        tableView.delegate = self
+        tableView.dataSource = self
+    }
+    
+    // MARK: - Actions
+    
+    @IBAction func addListButtonPressed(_ sender: UIButton) {
+        guard let newListName = newListTextField.text, !newListName.isEmpty else {
+            return
+        }
+        
+        shoppingLists.append(newListName)
+        newListTextField.text = ""
+        tableView.reloadData()
+    }
+    
+    @IBAction func deleteListButtonPressed(_ sender: UIButton) {
+        let selectedRow = tableView.indexPathForSelectedRow?.row
+        guard let row = selectedRow, row < shoppingLists.count else {
+            return
+        }
+        
+        shoppingLists.remove(at: row)
+        tableView.reloadData()
+        currentListItems.removeAll()
+    }
+    
+    @IBAction func addItemButtonPressed(_ sender: UIButton) {
+        let alertController = UIAlertController(title: "Add Item", message: nil, preferredStyle: .alert)
+        
+        alertController.addTextField { textField in
+            textField.placeholder = "Enter item name"
+        }
+        
+        let addAction = UIAlertAction(title: "Add", style: .default) { [weak self] _ in
+            guard let itemName = alertController.textFields?.first?.text, !itemName.isEmpty else {
+                return
+            }
+            
+            self?.currentListItems.append(itemName)
+            self?.tableView.reloadData()
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        
+        alertController.addAction(addAction)
+        alertController.addAction(cancelAction)
+        
+        present(alertController, animated: true, completion: nil)
+    }
+    
+    @IBAction func deleteItemButtonPressed(_ sender: UIButton) {
+        let selectedRow = tableView.indexPathForSelectedRow?.row
+        guard let row = selectedRow, row < currentListItems.count else {
+            return
+        }
+        
+        currentListItems.remove(at: row)
+        tableView.reloadData()
+    }
+    
+    // MARK: - TableView Methods
+    
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if tableView == self.tableView {
+            return shoppingLists.count
+        } else {
+            return currentListItems.count
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        if tableView == self.tableView {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ListCell", for: indexPath)
+            cell.textLabel?.text = shoppingLists[indexPath.row]
+            return cell
+        } else {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "ItemCell", for: indexPath)
+            cell.textLabel?.text = currentListItems[indexPath.row]
+            return cell
+        }
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if tableView == self.tableView {
+            currentListItems.removeAll()
+            tableView.deselectRow(at: indexPath, animated: true)
+            tableView.reloadData()
+        }
+    }
+}
